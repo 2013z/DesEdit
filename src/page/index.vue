@@ -28,7 +28,6 @@
           class="search-box"
           placeholder="搜索"
           v-model="searchDesName"
-          @blur="searchObj('des')"
         />
         <div class="aside-box">
           <div style="height: 100%;position: relative;overflow-x: hidden;">
@@ -307,7 +306,6 @@
               class="search-box"
               placeholder="搜索"
               v-model="searchGmcName"
-              @blur="searchObj('gmc')"
             />
             <div class="aside-box">
               <div
@@ -631,11 +629,11 @@
     </el-dialog>
     <!-- <el-footer> </el-footer> -->
     <iframe
-      style="height: 0; width: 0; border: none; outline: none; padding:0;margin:0; position:fixed; visibility: hidden;"
+      style="height: 0; width: 0; border: none; outline: none; padding:0;margin:0; position:fixed;"
       id="desDoc"
     ></iframe>
     <iframe
-      style="height: 0; width: 0; border: none; outline: none; padding:0;margin:0; position:fixed; visibility: hidden;"
+      style="height: 0; width: 0; border: none; outline: none; padding:0;margin:0; position:fixed;"
       id="gmcDoc"
     ></iframe>
   </div>
@@ -812,8 +810,9 @@ export default {
       let _this = this;
       // document.getElementById("desDoc").contentWindow.origin = "localhost";
       // document.getElementById("gmcDoc").contentWindow.origin = "localhost";
+      // 通过http-server集成方式来解决
       if (_this.fileType == "des") {
-        debugger; // " --disable-web-security" // ]
+        // " --disable-web-security" // ]
         // 如果打包成本地模式，不用端口号，谷歌浏览器会对iframe的src报一个origin "null" from accessing a cross-origin frame
         // 解决的方法是加配置,"runtimeArgs": [
         if (_this.nav == "CHROME") {
@@ -823,12 +822,13 @@ export default {
         } else if (_this.nav == "FIREFOX") {
           _this.desDoc = document.getElementById(
             "desDoc"
-          ).contentDocument.documentElement.innerText;
+          ).contentDocument.documentElement.children[1].innerText;
         } else if (_this.nav == "IE") {
           _this.desDoc = document.getElementById(
             "desDoc"
           ).contentDocument.activeElement.innerText;
         }
+        debugger
         let tmp = _this.desDoc.split("Object ");
         _this.sceneCount = tmp[0].match(/[\d| ]+[ |\d]/gim)[0] * 1;
         _this.dummeyCount = tmp[0].match(/[\d| ]+[ |\d]/gim)[1] * 1;
@@ -878,7 +878,7 @@ export default {
             // let objStr = `{"${nameStr}":{"${attrOneName}":{"X":"${attrOneValX}","Y":"${attrOneValY}","Z":"${attrOneValZ}"},"${attrTwoName}":{"W":"${attrTwoValW}","X":"${attrTwoValX}","Y":"${attrTwoValY}","Z":"${attrTwoValZ}"},"${attrThreeName}":{"LOCK":"${attrTreeValLock}","X":"${attrTreeValX}","Y":"${attrTreeValY}"}, "${attrFourName}":{${customInfoList.join()}}}}`;
             let objStr = `{"${attrOneName}":{"X":"${attrOneValX}","Y":"${attrOneValY}","Z":"${attrOneValZ}"},"${attrTwoName}":{"W":"${attrTwoValW}","X":"${attrTwoValX}","Y":"${attrTwoValY}","Z":"${attrTwoValZ}"},"${attrThreeName}":{"LOCK":"${attrTreeValLock}","X":"${attrTreeValX}","Y":"${attrTreeValY}"}, "${attrFourName}":{${customInfoList.join()}}}`;
             let obj = JSON.parse(objStr);
-            console.log(obj);
+            // console.log(obj);
             _this.desList.push(obj);
             _this.desNameList.push(nameStr);
           } else if (i > _this.dummeyCount) {
@@ -904,7 +904,7 @@ export default {
             // 将Custom所有的数据挪出
             let customInfoList = objList.slice(17, objList.length - 2);
             // 自定义属性先将字符串以Custom来切割，然后遍历自定义内容，替换=
-            for (let j = 0; j < customInfoList.length; j++) {
+            for (let j = 0, k = 0; j < customInfoList.length; j++) {
               // customInfoList[j] = customInfoList[j].replace("=", ":");
               let tmpArr = customInfoList[j].split("=");
               customInfoList[j] = `"${tmpArr[0]}":"${tmpArr[1].substring(
@@ -915,7 +915,7 @@ export default {
             // let objStr = `{"${nameStr}":{"${attrOneName}":{"X":"${attrOneValX}","Y":"${attrOneValY}","Z":"${attrOneValZ}"},"${attrTwoName}":{"W":"${attrTwoValW}","X":"${attrTwoValX}","Y":"${attrTwoValY}","Z":"${attrTwoValZ}"},"${attrThreeName}":{"LOCK":"${attrTreeValLock}","X":"${attrTreeValX}","Y":"${attrTreeValY}"}, "${attrFourName}":{${customInfoList.join()}}}}`;
             let objStr = `{"${attrOneName}":{"X":"${attrOneValX}","Y":"${attrOneValY}","Z":"${attrOneValZ}"},"${attrTwoName}":{"W":"${attrTwoValW}","X":"${attrTwoValX}","Y":"${attrTwoValY}","Z":"${attrTwoValZ}"},"${attrThreeName}":{"LOCK":"${attrTreeValLock}","X":"${attrTreeValX}","Y":"${attrTreeValY}"}, "${attrFourName}":{${customInfoList.join()}}}`;
             let obj = JSON.parse(objStr);
-            console.log(obj);
+            // console.log(obj);
             _this.desList.push(obj);
             _this.desNameList.push(nameStr);
           }
@@ -928,6 +928,7 @@ export default {
       } else if (_this.fileType == "gmc") {
         // 当文件上百M时，代码优化
         console.log("开始");
+
         if (_this.nav == "CHROME") {
           _this.gmcDoc = document.getElementById(
             "gmcDoc"
@@ -935,7 +936,7 @@ export default {
         } else if (_this.nav == "FIREFOX") {
           _this.gmcDoc = document.getElementById(
             "gmcDoc"
-          ).contentDocument.documentElement.innerText;
+          ).contentDocument.documentElement.children[1].innerText;
         } else if (_this.nav == "IE") {
           _this.gmcDoc = document.getElementById(
             "gmcDoc"
@@ -944,7 +945,7 @@ export default {
         // _this.gmcDoc = document.getElementById(
         //   "gmcDoc"
         // ).contentDocument.body.innerText;
-        console.log(_this.gmcDoc);
+        // console.log(_this.gmcDoc);
         let tmpGMCNameArr = _this.gmcDoc.split("Shaders ")[0].split(" ");
         let tmpGMCArr = _this.gmcDoc
           .split("SceneObjects")[0]
@@ -954,6 +955,7 @@ export default {
               return item;
             }
           });
+        console.log("中间");
         _this.shaderCount = tmpGMCNameArr[6];
         _this.$set(
           _this,
@@ -981,7 +983,7 @@ export default {
             .getElementsByClassName("aside-box")[1]
             .children[0].children[0].click();
         });
-        console.log(_this.gmcList);
+        // console.log(_this.gmcList);
         console.log("结束");
       }
     },
@@ -997,25 +999,38 @@ export default {
           _this.$set(_this, "gmcNameList", []);
         }
       }
+      console.log("hahahahahahahahaha")
       // res.currentTarget.files[0].type = "text/html";
       _this.fileName = res.currentTarget.files[0].name;
       if (_this.fileType == "des") {
         document.getElementById("desDoc").src =
           "./static/doc/" + _this.fileName;
         // 解决延迟渲染src内容问题
-        _this.$nextTick(() => {
+        _this.$nextTick(() => {console.log("agagagagagag")
+        // 当文件过大时，onload失效
           document.getElementById("desDoc").onload = () => {
             _this.openDoc();
           };
+          // $("#desDoc").on('load',{"_this":_this},(e)=>{
+          //   console.log(e);
+          //   e.data._this.openDoc();
+          // })
         });
       } else if (_this.fileType == "gmc") {
         document.getElementById("gmcDoc").src =
           "./static/doc/" + _this.fileName;
         // 解决延迟渲染src内容问题
         _this.$nextTick(() => {
-          document.getElementById("gmcDoc").onload = () => {
-            _this.openDoc();
-          };
+          console.log("hahahaha")
+          // 当文件过大时，原生的onload失效
+          // document.getElementById("gmcDoc").onload = () => {
+          //   console.log("来gmc文档")
+          //   _this.openDoc();
+          // };
+          $("#gmcDoc").on('load',{"_this":_this},(e)=>{
+            console.log(e);
+            e.data._this.openDoc();
+          })
         });
       }
     },
@@ -1161,7 +1176,7 @@ export default {
             "file.des"
           );
         } else {
-          _this.$message("没有读入文件");
+          setTimeout(()=>{ _this.$message(`没有读入.des文件`);}, 100, _this)
         }
       }
       if (flag == "gmc" || flag == "all") {
@@ -1190,7 +1205,7 @@ export default {
           } else if (_this.nav == "FIREFOX") {
             lowText = document
               .getElementById("gmcDoc")
-              .contentDocument.documentElement.innerHTML.split(
+              .contentDocument.documentElement.children[1].innerHTML.split(
                 "SceneObjects "
               )[1];
           } else if (_this.nav == "IE") {
@@ -1207,7 +1222,7 @@ export default {
             `file.gmc`
           );
         } else {
-          _this.$message("没有读入文件");
+          setTimeout(()=>{ _this.$message(`没有读入.gmc文件`);}, 300, _this)
         }
       }
     },
@@ -1305,7 +1320,15 @@ export default {
     },
     setCustomInfoByDamage(val) {
       let _this = this;
-      _this.$set(_this.desList[_this.desIndex].Custom, "name", `damage ${val}`);
+      if(val == 0 &&  _this.desList[_this.desIndex].Custom.name != undefined){
+        delete _this.desList[_this.desIndex].Custom["name"];
+        _this.refresh++;
+      } else if (val == 0){
+        delete _this.desList[_this.desIndex].Custom["name"];
+        _this.refresh++;
+      }else {
+        _this.$set(_this.desList[_this.desIndex].Custom, "name", `damage ${val}`);
+      }
     },
     setBlendAttrLink(attrIndex, flag) {
       let _this = this;
@@ -1398,8 +1421,8 @@ export default {
             _this.desNameList.push(`D_${_this.addObjName}0${i + 1}`);
           }
         }
-        console.log(_this.desNameList);
-        console.log(_this.desList);
+        // console.log(_this.desNameList);
+        // console.log(_this.desList);
         _this.$message({
           type: "success",
           message: "添加成功!"
@@ -1409,7 +1432,7 @@ export default {
     },
     delCustomAttr(index) {
       let _this = this;
-      console.log(_this.currentCustomAttr);
+      // console.log(_this.currentCustomAttr);
       if (_this.currentCustomAttr == "name") {
         _this.customAttrNameList.splice(index, 1);
         localStorage.setItem(
@@ -1446,8 +1469,8 @@ export default {
           }
           _this.desNameList.splice(index, 1);
           _this.desList.splice(index, 1);
-          console.log(_this.desNameList);
-          console.log(_this.desList);
+          // console.log(_this.desNameList);
+          // console.log(_this.desList);
           _this.refresh++;
           _this.$message({
             type: "success",
@@ -1468,6 +1491,7 @@ export default {
             allMatch = false;
             a.href = "#" + _this.desNameList[i];
             a.click();
+            debugger
             // 跳回到搜索框
             document
               .getElementsByClassName("search-box")[0]
@@ -1488,7 +1512,7 @@ export default {
           if (match.test(_this.gmcNameList[i] && _this.searchGmcName != "")) {
             allMatch = false;
             a.href = "#" + _this.gmcNameList[i];
-            a.click();
+            a.click();debugger
             // 跳回到搜索框
             document
               .getElementsByClassName("search-box")[1]
