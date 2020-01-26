@@ -589,7 +589,8 @@
           >
           </el-option>
         </el-select>
-        <span style="width: 100px;">对象名：</span><el-input v-model="addObjName" />
+        <span style="width: 100px;">对象名：</span
+        ><el-input v-model="addObjName" />
       </div>
       <div class="dialog-node" v-show="preObjName == 'D_wp'">
         <span>附加对象：D_{{ addObjName }}</span>
@@ -644,7 +645,7 @@
 import "@/assets/js/jquery-3.4.1.min.js";
 import "@/util/directives";
 import { saveAs } from "@/util/FileSaver.js";
-import { deepClone } from "@/util/common.js";
+import { deepClone, navType } from "@/util/common.js";
 
 export default {
   name: "index",
@@ -738,7 +739,9 @@ export default {
       // 当前操作的资源路径
       currentOpUrl: "",
       // des路径
-      document: {}
+      document: {},
+      // 浏览器版本
+      nav: ""
     };
   },
   created() {
@@ -749,6 +752,7 @@ export default {
     let models = localStorage.getItem("customAttrModelList");
     let effects = localStorage.getItem("customAttrEffectList");
     let radios = localStorage.getItem("customAttrRadioList");
+    _this.nav = navType();
     if (effectUrl != undefined && effectUrl != null) {
       _this.effectUrl = JSON.parse(effectUrl);
     }
@@ -812,9 +816,19 @@ export default {
         debugger; // " --disable-web-security" // ]
         // 如果打包成本地模式，不用端口号，谷歌浏览器会对iframe的src报一个origin "null" from accessing a cross-origin frame
         // 解决的方法是加配置,"runtimeArgs": [
-        _this.desDoc = document.getElementById(
-          "desDoc"
-        ).contentDocument.body.innerText;
+        if (_this.nav == "CHROME") {
+          _this.desDoc = document.getElementById(
+            "desDoc"
+          ).contentDocument.body.innerText;
+        } else if (_this.nav == "FIREFOX") {
+          _this.desDoc = document.getElementById(
+            "desDoc"
+          ).contentDocument.documentElement.innerText;
+        } else if (_this.nav == "IE") {
+          _this.desDoc = document.getElementById(
+            "desDoc"
+          ).contentDocument.activeElement.innerText;
+        }
         let tmp = _this.desDoc.split("Object ");
         _this.sceneCount = tmp[0].match(/[\d| ]+[ |\d]/gim)[0] * 1;
         _this.dummeyCount = tmp[0].match(/[\d| ]+[ |\d]/gim)[1] * 1;
@@ -914,9 +928,22 @@ export default {
       } else if (_this.fileType == "gmc") {
         // 当文件上百M时，代码优化
         console.log("开始");
-        _this.gmcDoc = document.getElementById(
-          "gmcDoc"
-        ).contentDocument.body.innerText;
+        if (_this.nav == "CHROME") {
+          _this.gmcDoc = document.getElementById(
+            "gmcDoc"
+          ).contentDocument.body.innerText;
+        } else if (_this.nav == "FIREFOX") {
+          _this.gmcDoc = document.getElementById(
+            "gmcDoc"
+          ).contentDocument.documentElement.innerText;
+        } else if (_this.nav == "IE") {
+          _this.gmcDoc = document.getElementById(
+            "gmcDoc"
+          ).contentDocument.activeElement.innerText;
+        }
+        // _this.gmcDoc = document.getElementById(
+        //   "gmcDoc"
+        // ).contentDocument.body.innerText;
         console.log(_this.gmcDoc);
         let tmpGMCNameArr = _this.gmcDoc.split("Shaders ")[0].split(" ");
         let tmpGMCArr = _this.gmcDoc
@@ -1155,11 +1182,25 @@ export default {
             let Opaque = `  Opaque ${_this.gmcList[i].Opaque.val1}\n}`;
             gmcText += shaderName + Texture + TwoSide + Blend + Opaque;
           }
-          gmcText += `\nSceneObjects ${
-            document
+          let lowText = "";
+          if (_this.nav == "CHROME") {
+            lowText = document
               .getElementById("gmcDoc")
-              .contentDocument.body.innerHTML.split("SceneObjects ")[1]
-          }`;
+              .contentDocument.body.innerHTML.split("SceneObjects ")[1];
+          } else if (_this.nav == "FIREFOX") {
+            lowText = document
+              .getElementById("gmcDoc")
+              .contentDocument.documentElement.innerHTML.split(
+                "SceneObjects "
+              )[1];
+          } else if (_this.nav == "IE") {
+            lowText = document
+              .getElementById("gmcDoc")
+              .contentDocument.activeElement.innerHTML.split(
+                "SceneObjects "
+              )[1];
+          }
+          gmcText += `\nSceneObjects ${lowText}`;
           // 转换为des
           saveAs(
             new Blob([gmcText], { type: "txt/plain;charset=utf-8" }),
@@ -1915,7 +1956,8 @@ export default {
     span {
     }
     .el-input {
-      flex: 1;
+      // flex: 1;
+      width: auto;
     }
   }
 }

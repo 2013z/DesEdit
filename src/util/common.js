@@ -54,3 +54,34 @@ export const randomLenNum = (len, date) => {
   if (date) random = random + Date.now();
   return random;
 };
+
+/**
+ * 浏览器类型判断
+ */
+export const navType = () => {
+  var Sys = {};
+  var ua = navigator.userAgent.toLowerCase();
+  var s;
+  (s = ua.match(/msie ([\d.]+)/))
+    ? (Sys.ie = s[1])
+    : (s = ua.match(/firefox\/([\d.]+)/))
+    ? (Sys.firefox = s[1])
+    : (s = ua.match(/chrome\/([\d.]+)/))
+    ? (Sys.chrome = s[1])
+    : (s = ua.match(/opera.([\d.]+)/))
+    ? (Sys.opera = s[1])
+    : (s = ua.match(/version\/([\d.]+).*safari/))
+    ? (Sys.safari = s[1])
+    : 0;
+  if (Sys.ie <= "6.0") {
+    return "IE";
+  } else if (Sys.ie >= "7.0") {
+    return "IE";
+  } else if (Sys.firefox) {
+    return "FIREFOX";
+  } else if (Sys.chrome) {
+    return "CHROME";
+  } else {
+    return "";
+  }
+};
